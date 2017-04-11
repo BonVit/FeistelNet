@@ -40,8 +40,28 @@ public class ArrayUtills {
         return (byte) (a | b);
     }
 
+    public static final int merge2Bytes(int a, int b)
+    {
+        a = (int) (a << 4);
+        a &= 255;
+        b &= 255;
+        return (int) (a | b);
+    }
+
     public static final byte[] intTo4BitsArray(int value) {
         return new byte[] {
+                (byte)((value >>> 28) % 16),
+                (byte)((value >>> 24) % 16),
+                (byte)((value >>> 20) % 16),
+                (byte)((value >>> 16) % 16),
+                (byte)((value >>> 12) % 16),
+                (byte)((value >>> 8) % 16),
+                (byte)((value >>> 4) % 16),
+                (byte) (value % 16)};
+    }
+
+    public static final int[] intTo4BitsArray(long value) {
+        return new int[] {
                 (byte)((value >>> 28) % 16),
                 (byte)((value >>> 24) % 16),
                 (byte)((value >>> 20) % 16),

@@ -3,6 +3,7 @@ package com.vb.feistelnet;
 import android.util.Log;
 
 import java.nio.charset.Charset;
+import java.util.BitSet;
 
 /**
  * Created by bonar on 3/29/2017.
@@ -11,7 +12,7 @@ import java.nio.charset.Charset;
 public class FeistelNet {
     private static final String TAG = "FeistelNet";
 
-    private static final int MAX_ROUNDS = 5;
+    private static final int MAX_ROUNDS = 16;
 
     private static final int BLOCK_SIZE = 8;
 
@@ -32,63 +33,77 @@ public class FeistelNet {
     }
 
     public byte[] getBlock(final byte[] block, boolean encrypt) {
-        if(block.length != BLOCK_SIZE)
+        if (block.length != BLOCK_SIZE)
             return null;
 
-        int l = ArrayUtills.byteArrayToInt(ArrayUtills.subByteArray(block, 0, BLOCK_SIZE / 2));
-        int r = ArrayUtills.byteArrayToInt(ArrayUtills.subByteArray(block, BLOCK_SIZE / 2 + BLOCK_SIZE % 2, BLOCK_SIZE / 2));
-
-        Log.d(TAG, "" + l);
-        Log.d(TAG, "" + r);
+        BitSet l = BitsUtills.bitSetFromInt(ArrayUtills.byteArrayToInt(ArrayUtills.subByteArray(block, 0, BLOCK_SIZE / 2)));
+        BitSet r = BitsUtills.bitSetFromInt(ArrayUtills.byteArrayToInt(ArrayUtills.subByteArray(block, BLOCK_SIZE / 2 + BLOCK_SIZE % 2, BLOCK_SIZE / 2)));
+        Log.d(TAG, l.toString() + " " + l.length());
+        Log.d(TAG, r.toString() + " " + r.length());
 
         int round = (encrypt) ? 1 : MAX_ROUNDS;
 
         for(int i = 0; i < MAX_ROUNDS; i++)
         {
+            Log.d(TAG, "l: " + BitsUtills.bitSetToInt(l));
+            Log.d(TAG, "r: " + BitsUtills.bitSetToInt(r));
+
             if (i < MAX_ROUNDS - 1)
             {
-                int t = l;
-                l = r ^ f(l, round);
+                BitSet t = (BitSet) l.clone();
+//                l = r ^ f(l, round);
+                l = (BitSet) r.clone();
+                l.xor(f(t, round));
                 r = t;
             } else
-                r = r ^ f(l, round);
+                r.xor(f(l, round));
+
+            Log.d(TAG, "l: " + BitsUtills.bitSetToInt(l));
+            Log.d(TAG, "r: " + BitsUtills.bitSetToInt(r));
+
 
             Log.d(TAG, "Round: " + round);
-
             round += (encrypt) ? 1 : -1;
         }
 
-        return ArrayUtills.mergeByteArrays(ArrayUtills.intToByteArray(l), ArrayUtills.intToByteArray(r));
+        byte[] la = new byte[BLOCK_SIZE / 2];
+        byte[] ra = new byte[BLOCK_SIZE / 2];
+        byte[] il = l.toByteArray();
+        byte[] ir = r.toByteArray();
+        for(int i = la.length - 1, al = 0, ar = 0; i >= 0; i--)
+        {
+            if(al >= il.length)
+                la[i] = 0;
+            else {
+                la[i] = il[al];
+                al++;
+            }
+            if(ar >= ir.length)
+                ra[i] = 0;
+            else {
+                ra[i] = ir[ar];
+                ar++;
+            }
+        }
+
+        return ArrayUtills.mergeByteArrays(la, ra);
     }
 
-    private int f(int a, int k)
+    private BitSet f(BitSet a, int k)
     {
-        return a + k;
-    }
+        long number = BitsUtills.bitSetToInt(a) % k;
 
-    /*private int f(int a, int k)
+        int[] arr = ArrayUtills.intTo4BitsArray(number);
+        int[] i = mixArray(arr);
+
+        return BitsUtills.bitSetFromInt(ArrayUtills.byteArrayToInt(i));
+}
+
+    private int[] mixArray(int[] arr)
     {
-        a += k;
+        int[] tmp = new int[arr.length];
 
-
-
-        return a;
-    }*/
-
-    private int code(int a)
-    {
-        byte[] n = ArrayUtills.intTo4BitsArray(a);
-
-        int[] i = mixArray(n);
-
-        return ArrayUtills.byteArrayToInt(i);
-    }
-
-    private int[] mixArray(byte[] arr)
-    {
-        byte[] tmp = new byte[arr.length];
-
-        final byte[][] CODE_TABLE = new byte[][] {
+        final int[][] CODE_TABLE = new int[][] {
                 {0, 7, 3, 4, 6, 2, 1, 8, 10, 13, 15, 14, 9, 12, 5, 11},
                 {7, 3, 4, 6, 2, 1, 8, 10, 13, 15, 14, 9, 12, 5, 11, 0},
                 {3, 4, 6, 2, 1, 8, 10, 13, 15, 14, 9, 12, 5, 11, 0, 7},
@@ -100,8 +115,8 @@ public class FeistelNet {
         };
 
         for(int i = 0; i < arr.length; i++) {
-            byte t = arr[i];
-            t = (t <= 0) ? (byte) -t: t;
+            int t = arr[i];
+            t = (t <= 0) ? (int) -t: t;
             tmp[i] = CODE_TABLE[i][t];
         }
         int[] result = new int[tmp.length / 2];

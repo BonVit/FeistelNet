@@ -48,9 +48,9 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void afterTextChanged(Editable editable) {
                 if(editable.toString().length() == 0)
-                    mDecryptButton.setEnabled(false);
+                    mEncryptButton.setEnabled(false);
                 else
-                    mDecryptButton.setEnabled(true);
+                    mEncryptButton.setEnabled(true);
             }
         });
 
@@ -69,9 +69,9 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void afterTextChanged(Editable editable) {
                 if(editable.toString().length() == 0)
-                    mEncryptButton.setEnabled(false);
+                    mDecryptButton.setEnabled(false);
                 else
-                    mEncryptButton.setEnabled(true);
+                    mDecryptButton.setEnabled(true);
             }
         });
 
@@ -80,7 +80,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 loading(true);
-                new CryptAsyncTask().execute(mDecryptText.getText().toString(), ENCRYPT);
+                new CryptAsyncTask().execute(mEncryptText.getText().toString(), ENCRYPT);
             }
         });
 
@@ -89,15 +89,15 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 loading(true);
-                new CryptAsyncTask().execute(mEncryptText.getText().toString(), DECRYPT);
+                new CryptAsyncTask().execute(mDecryptText.getText().toString(), DECRYPT);
             }
         });
 
         loading(false);
         if(mEncryptText.getText().toString().length() == 0)
-            mDecryptButton.setEnabled(false);
-        if(mDecryptText.getText().toString().length() == 0)
             mEncryptButton.setEnabled(false);
+        if(mDecryptText.getText().toString().length() == 0)
+            mDecryptButton.setEnabled(false);
     }
 
     private class CryptAsyncTask extends AsyncTask<String, Object, Pair<String, Boolean>>
@@ -132,9 +132,9 @@ public class MainActivity extends AppCompatActivity {
             loading(false);
 
             if(result.second)
-                mEncryptText.setText(result.first);
-            else
                 mDecryptText.setText(result.first);
+            else
+                mEncryptText.setText(result.first);
         }
     }
 
