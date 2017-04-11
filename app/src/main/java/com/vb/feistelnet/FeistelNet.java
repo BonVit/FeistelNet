@@ -66,6 +66,49 @@ public class FeistelNet {
         return a + k;
     }
 
+    /*private int f(int a, int k)
+    {
+        a += k;
 
 
+
+        return a;
+    }*/
+
+    private int code(int a)
+    {
+        byte[] n = ArrayUtills.intTo4BitsArray(a);
+
+        int[] i = mixArray(n);
+
+        return ArrayUtills.byteArrayToInt(i);
+    }
+
+    private int[] mixArray(byte[] arr)
+    {
+        byte[] tmp = new byte[arr.length];
+
+        final byte[][] CODE_TABLE = new byte[][] {
+                {0, 7, 3, 4, 6, 2, 1, 8, 10, 13, 15, 14, 9, 12, 5, 11},
+                {7, 3, 4, 6, 2, 1, 8, 10, 13, 15, 14, 9, 12, 5, 11, 0},
+                {3, 4, 6, 2, 1, 8, 10, 13, 15, 14, 9, 12, 5, 11, 0, 7},
+                {4, 6, 2, 1, 8, 10, 13, 15, 14, 9, 12, 5, 11, 0, 7, 3},
+                {6, 2, 1, 8, 10, 13, 15, 14, 9, 12, 5, 11, 0, 7, 3, 4},
+                {2, 1, 8, 10, 13, 15, 14, 9, 12, 5, 11, 0, 7, 3, 4, 6},
+                {1, 8, 10, 13, 15, 14, 9, 12, 5, 11, 0, 7, 3, 4, 6, 2},
+                {8, 10, 13, 15, 14, 9, 12, 5, 11, 0, 7, 3, 4, 6, 2, 1},
+        };
+
+        for(int i = 0; i < arr.length; i++) {
+            byte t = arr[i];
+            t = (t <= 0) ? (byte) -t: t;
+            tmp[i] = CODE_TABLE[i][t];
+        }
+        int[] result = new int[tmp.length / 2];
+
+        for(int i = 0; i < result.length; i++)
+            result[i] = ArrayUtills.merge2Bytes(tmp[i * 2], tmp[i * 2 + 1]);
+
+        return result;
+    }
 }

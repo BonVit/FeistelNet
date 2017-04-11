@@ -13,12 +13,43 @@ public class ArrayUtills {
                 (b[0] & 0xFF) << 24;
     }
 
+    public static int byteArrayToInt(final int[] b)
+    {
+        return   b[3] & 0xFF |
+                (b[2] & 0xFF) << 8 |
+                (b[1] & 0xFF) << 16 |
+                (b[0] & 0xFF) << 24;
+    }
+
+    public static byte getByte(int a, int pos)
+    {
+        return (byte) (a >>> (pos * 8));
+    }
+
     public static final byte[] intToByteArray(int value) {
         return new byte[] {
-                (byte)(value >>> 24),
-                (byte)(value >>> 16),
-                (byte)(value >>> 8),
-                (byte)value};
+                (byte) (value >>> 24),
+                (byte) (value >>> 16),
+                (byte) (value >>> 8),
+                (byte) value};
+    }
+
+    public static final byte merge2Bytes(byte a, byte b)
+    {
+        a = (byte) (a << 4);
+        return (byte) (a | b);
+    }
+
+    public static final byte[] intTo4BitsArray(int value) {
+        return new byte[] {
+                (byte)((value >>> 28) % 16),
+                (byte)((value >>> 24) % 16),
+                (byte)((value >>> 20) % 16),
+                (byte)((value >>> 16) % 16),
+                (byte)((value >>> 12) % 16),
+                (byte)((value >>> 8) % 16),
+                (byte)((value >>> 4) % 16),
+                (byte) (value % 16)};
     }
 
     public static byte[] mergeByteArrays(byte[] a, byte[] b)
